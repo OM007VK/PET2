@@ -1,7 +1,7 @@
 var dog, happyDogImage, DogImage;
 var database; 
 var MilkImage, MilkImg;
-var foodS, foodStock;
+var foodS, foodStock, lastFed;
 
 var foodObj;
 
@@ -22,6 +22,11 @@ function setup() {
   foodStock=database.ref("Food")
   foodStock.on("value",readFoodStock)
   database.ref("/").update({Food:20})
+
+  dbref = database.ref("FeedTime")
+  dbref.on("value", function(data){
+    lastFed = data.val();
+  })
   
   foodObj = new Food()
   //create feed the dog button here 
@@ -31,50 +36,61 @@ function setup() {
 
   lastFed = createButton("Feed the dog"); 
   lastFed.position(1100,100); 
-  lastFed.mousePressed(addingFood);
+  lastFed.mousePressed(FeedingFood);
 }
 
 function draw() {  
   background(46,139,87)
   textSize(20);
-  fill ("black")
-  text(mouseX + "," + mouseY, mouseX,mouseY)
 
   foodObj.display();
 
-  fill("white");
   textSize(15);
-  text("ADD FOOD BUTTON",515,30)
   fill("white");
+  text("ADD FOOD BUTTON",515,30)
   textSize(15);
   text("FEED GOD BUTTON",720,30)
-  fill("white");
   textSize(25);
   text("Food Count: "+foodS,300,50);
-  fill("white");
   textSize(25);
   text("_____________",295,50);
+  if(lastFed<12)
+  {
+  text("Feed Time: "+lastFed + " AM ",300,100);
+ 
+  }
+  else if(lastFed===12)  // noon 
+  {
+    text("Feed Time: "+lastFed + " AM ",300,100);
+  }
+  else if(lastFed > 12) // after noon PM
+  {
+    
+    text("Feed Time: "+ (lastFed-12) + " PM ",300,100);
+  }
 
   foodObj.foodStock=foodS;
 
   drawSprites();
+  fill ("black")
+  text(mouseX + "," + mouseY, mouseX,mouseY)
 }
 
   function readFoodStock(data){
   foodS=data.val();
   console.log("sting")
-  foodObj.foodStock=foodS;
+  //foodObj.foodStock=foodS;
 }
   function dogFood(){
     dog.addImage(happyDogImage);
     foodS++;
     database.ref('/').update({
     Food:foodS,
-    FeedTime : hour()
+    //FeedTime : hour()
     })
     foodObj.foodStock=foodS;
   } 
-  function addingFood(){
+  function FeedingFood(){
     dog.addImage(happyDogImage);
     foodS--;
     database.ref('/').update({
